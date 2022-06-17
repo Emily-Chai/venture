@@ -1,0 +1,107 @@
+---
+title: "Between lines (R. J. de Ayala, 2022)"
+author: "Zhi Chai"
+date: '2022-06-17'
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(bookdown)
+```
+
+## The Standard Error of Estimate and Information (p. 29)
+
+### 1PL model's first derivative wrt $\theta$ (p. 29)
+$$
+p'= \displaystyle \frac{\partial p_{j}}{\partial \theta} \\
+$$
+where $p_{j}=\displaystyle\frac{e^{\alpha(\theta-\delta)}}{1+e^{\alpha(\theta-\delta)}}$, and $1-p_j=\displaystyle\frac{1}{1+e^{\alpha(\theta-\delta)}}$
+
+According to the chain rule.
+
+$\displaystyle \frac{\partial}{\partial x}[f(g(x))]=f'(g(x))g'(x)$,
+where $f(x)=\displaystyle \frac{1}{1+x}$ and $g(x)=e^{\alpha(\theta-\delta)}$
+and $f'(x)=(x)'\displaystyle (\frac{1}{1+x})+(x)(\frac{1}{1+x})'= \frac{1}{1+x} + x\cdot(-1)\cdot\frac{1}{(1+x)^2}=\frac{1}{1+x} - \frac{x}{(1+x)^2}=\frac{1}{(1+x)^2}$ and $g'(x)=\alpha\cdot e^{\alpha(\theta-\delta)}$
+
+Therefore,
+$$
+\begin{align}
+\displaystyle\frac{\partial}{\partial \theta}[f(g(\theta))]&=f'(g(\theta))\cdot g'(\theta)\\
+&=f'(e^{\alpha(\theta-\delta)})\cdot \alpha\cdot e^{\alpha(\theta-\delta)}=\displaystyle \frac{\alpha}{(1+e^{\alpha(\theta-\delta)})^2}\cdot e^{\alpha(\theta-\delta)}=\alpha\cdot \frac{e^{\alpha(\theta-\delta)}}{1+e^{\alpha(\theta-\delta)}}\cdot \frac{1}{1+e^{\alpha(\theta-\delta)}}=\alpha p(1-p)
+\end{align}
+$$
+
+###  Numerical Example of SEE (p. 29)
+Given a person's location is -0.8378, his/her responses to the five items are (1, 1, 0, 0, 0), and the five item locations are (-1.9, -0.6, -0.25, 0.3, 0.45), here is how you get the SEE of almost a full logit (p. 29).
+```{r}
+one_PL_p <- function(theta, delta, a, x) {
+  n = exp( a*(theta-delta) )    # numerator
+  d = 1+n                      # denominator
+  if (x == 1){
+    n / d
+  } else if (x == 0){
+    1 - n / d
+  } else {print("x can only take 1 or 0 as input value")}
+}
+
+one_PL_p <- function(theta, delta, a, x) {
+  n = exp( a*(theta-delta) )    # numerator
+  d = 1+n                       # denominator
+  if (x == 1){
+    n / d
+  } else if (x == 0){
+    1 - n / d
+  } else {print("x can only take 1 or 0 as input value")}
+}
+
+one_PL_se <- function(theta, delta_vec, a, x_vec){
+  sum = 0
+  for (i in 1:length(delta_vec)) {
+    p = one_PL_p(theta=theta, delta = delta_vec[i], a=a, x = x_vec[i])
+    sum = sum + ( a^2 * p * (1-p) ) }
+  se = sqrt(1/sum)
+}
+
+# one_PL_se(theta, delta_vec, a, x_vec)
+delta_vec = c(-1.9, -0.6, -0.25, 0.3, 0.45)
+x_vec=c(1,1,0,0,0)
+se = one_PL_se( theta=-0.8378, delta_vec=delta_vec, a=1, x_vec=x_vec )
+se
+```
+
+## Quarterly Results {.tabset}
+
+### By Product
+
+(tab content)
+
+### By Region
+
+(tab content)
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
